@@ -1,0 +1,129 @@
+/* SmartPark Standalone Frontend Styles */
+:root {
+  --primary: #1e3a8a;
+  --primary-hover: #1e40af;
+  --primary-dark: #0f172a;
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --bg-main: #f8fafc;
+  --card-border: #e2e8f0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-main);
+  color: #1e293b;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-navbar {
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.sp-brand {
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tagline {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.hero-banner {
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 70%, #1e40af 100%);
+  color: #ffffff;
+  padding: 4.5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-banner::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.2) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.btn-accent {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.btn-accent:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #ffffff;
+}
+
+.card {
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.stat-icon.blue { background-color: #dbeafe; color: #1e40af; }
+.stat-icon.green { background-color: #dcfce7; color: #15803d; }
+.stat-icon.amber { background-color: #fef3c7; color: #b45309; }
+.stat-icon.red { background-color: #fee2e2; color: #b91c1c; }
+.stat-icon.purple { background-color: #f3e8ff; color: #7e22ce; }
+
+/* Interactive Occupancy Grid */
+.slot-box {
+  border-radius: 8px;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.slot-box.AVAILABLE { background-color: #ecfdf5; border: 2px solid #34d399; color: #065f46; }
+.slot-box.RESERVED { background-color: #fffbeb; border: 2px solid #fbbf24; color: #92400e; }
+.slot-box.OCCUPIED { background-color: #fef2f2; border: 2px solid #f87171; color: #991b1b; }
+.slot-box.MAINTENANCE { background-color: #f8fafc; border: 2px dashed #94a3b8; color: #64748b; }
+
+.section-view {
+  display: none;
+}
+.section-view.active {
+  display: block;
+}
+
+footer {
+  margin-top: auto;
+  background-color: var(--primary-dark);
+  color: #94a3b8;
+  padding: 2.5rem 0 1.5rem;
+}
+
+@media print {
+  body * { visibility: hidden; }
+  .print-area, .print-area * { visibility: visible; }
+  .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+}

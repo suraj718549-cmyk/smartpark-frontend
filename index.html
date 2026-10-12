@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartPark - Smart Parking Management System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark sp-navbar sticky-top">
+    <div class="container-fluid px-lg-4">
+        <a class="navbar-brand sp-brand" href="#" onclick="showView('home')">
+            <i class="bi bi-p-square-fill text-warning"></i>
+            <div>
+                <div>SmartPark</div>
+                <div class="tagline d-none d-sm-block">Park Smarter | Save Time | Move Better</div>
+            </div>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#spNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="spNav">
+            <ul class="navbar-nav me-auto ms-lg-3">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showView('home')"><i class="bi bi-house-door me-1"></i> Home</a>
+                </li>
+                <!-- Driver Links -->
+                <li class="nav-item role-driver auth-only d-none">
+                    <a class="nav-link" href="#" onclick="showView('driver-search')"><i class="bi bi-search me-1"></i> Find Slot</a>
+                </li>
+                <li class="nav-item role-driver auth-only d-none">
+                    <a class="nav-link" href="#" onclick="showView('driver-bookings')"><i class="bi bi-journal-bookmark me-1"></i> My Bookings</a>
+                </li>
+                <li class="nav-item role-driver auth-only d-none">
+                    <a class="nav-link" href="#" onclick="showView('driver-vehicles')"><i class="bi bi-car-front me-1"></i> My Garage</a>
+                </li>
+                <!-- Operator Links -->
+                <li class="nav-item role-operator auth-only d-none">
+                    <a class="nav-link" href="#" onclick="showView('operator-grid')"><i class="bi bi-layout-text-window-reverse me-1"></i> Live Grid</a>
+                </li>
+                <li class="nav-item role-operator auth-only d-none">
+                    <a class="nav-link" href="#" onclick="showView('operator-bookings')"><i class="bi bi-check2-circle me-1"></i> Gate Processing</a>
+                </li>
+                <!-- Admin Links -->
+                <li class="nav-item role-admin auth-only d-none">
+                    <a class="nav-link" href="#" onclick="showView('admin-dashboard')"><i class="bi bi-bar-chart-line me-1"></i> Analytics</a>
+                </li>
+                <li class="nav-item role-admin auth-only d-none">
+                    <a class="nav-link" href="#" onclick="showView('admin-users')"><i class="bi bi-people me-1"></i> Users</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <!-- Backend API Target Pill -->
+                <li class="nav-item me-lg-3 my-2 my-lg-0">
+                    <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#apiConfigModal">
+                        <i class="bi bi-hdd-network"></i>
+                        <span class="small">Backend API</span>
+                        <span id="apiStatusBadge" class="badge bg-secondary" style="font-size:0.65rem;">Checking...</span>
+                    </button>
+                </li>
+
+                <!-- Guest items -->
+                <li class="nav-item guest-only me-2">
+                    <a class="btn btn-outline-light btn-sm px-3" href="#" onclick="showView('login')">Sign In</a>
+                </li>
+                <li class="nav-item guest-only">
+                    <a class="btn btn-accent btn-sm px-3" href="#" onclick="showView('register')">Register</a>
+                </li>
+
+                <!-- Authenticated user info -->
+                <li class="nav-item auth-only d-none dropdown">
+                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                        <span class="badge bg-light text-dark rounded-circle p-2"><i class="bi bi-person-fill"></i></span>
+                        <span id="userNameSpan" class="fw-semibold">User</span>
+                        <span id="userRoleBadge" class="badge bg-warning text-dark small">DRIVER</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li><a class="dropdown-item text-danger" href="#" onclick="handleLogout()"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Main App Content Container -->
+<main class="flex-grow-1">
+
+    <!-- VIEW: Home Landing -->
+    <div id="view-home" class="section-view active">
+        <section class="hero-banner text-center py-5">
+            <div class="container py-lg-4">
+                <span class="badge bg-success mb-3 px-3 py-1 rounded-pill">Cloud Parking Architecture</span>
+                <h1 class="display-4 fw-extrabold text-white mb-3">
+                    SmartPark – Smart Parking Management System
+                </h1>
+                <p class="lead text-light opacity-75 max-w-700 mx-auto mb-4">
+                    Park Smarter | Save Time | Move Better. The centralized web platform for slot reservations, live occupancy grids, and automated duration billing.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-accent btn-lg px-4" onclick="showView('driver-search')">
+                        <i class="bi bi-geo-alt-fill me-2"></i>Find Parking Bay
+                    </button>
+                    <button class="btn btn-outline-light btn-lg px-4" onclick="showView('login')">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Portal Login
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live KPI Stats -->
+        <section class="py-4 bg-white border-bottom shadow-sm">
+            <div class="container">
+                <div class="row g-4 text-center">
+                    <div class="col-4">
+                        <div class="h2 fw-bold text-primary mb-0" id="statTotalSlots">47</div>
+                        <div class="text-muted small text-uppercase">Total Smart Slots</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="h2 fw-bold text-success mb-0" id="statAvailableSlots">35</div>
+                        <div class="text-muted small text-uppercase">Available Right Now</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="h2 fw-bold text-danger mb-0" id="statOccupiedSlots">10</div>
+                        <div class="text-muted small text-uppercase">Occupied Bays</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Tariff Engine Section -->
+        <section class="py-5 bg-light">
+            <div class="container">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Active Parking Tariffs</h3>
+                    <p class="text-muted small">Hourly rates include a 15-minute free grace window and ceiling duration rounding.</p>
+                </div>
+                <div class="card shadow-sm border-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Applicability</th>
+                                    <th>Hourly Rate</th>
+                                    <th>Minimum Charge</th>
+                                    <th>Grace Period</th>
+                                </tr>
+                            </thead>
+                            <tbody id="publicTariffTable">
+                                <tr><td colspan="5" class="text-center py-3 text-muted">Loading tariffs from backend...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- VIEW: Login -->
+    <div id="view-login" class="section-view">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="card p-4 p-md-5 shadow border-0">
+                        <div class="text-center mb-4">
+                            <div class="stat-icon blue mx-auto mb-2"><i class="bi bi-box-arrow-in-right fs-3"></i></div>
+                            <h3 class="fw-bold">Sign In</h3>
+                            <p class="text-muted small">Access your Driver, Operator, or Admin workspace</p>
+                        </div>
+                        <form onsubmit="handleLogin(event)">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Email Address</label>
+                                <input type="email" id="loginEmail" class="form-control" required placeholder="name@smartpark.com">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Password</label>
+                                <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mb-3">Sign In</button>
+                        </form>
+
+                        <div class="border-top pt-3 text-center">
+                            <p class="small text-muted mb-2">⚡ Quick Fill Demo Accounts</p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-danger btn-sm text-start" onclick="quickFill('admin@smartpark.com', 'Admin@123')">
+                                    <i class="bi bi-shield-lock-fill me-1"></i> Admin: admin@smartpark.com
+                                </button>
+                                <button class="btn btn-outline-warning text-dark btn-sm text-start" onclick="quickFill('operator@smartpark.com', 'Operator@123')">
+                                    <i class="bi bi-person-workspace me-1"></i> Operator: operator@smartpark.com
+                                </button>
+                                <button class="btn btn-outline-success btn-sm text-start" onclick="quickFill('driver@smartpark.com', 'Driver@123')">
+                                    <i class="bi bi-car-front-fill me-1"></i> Driver: driver@smartpark.com
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: Register -->
+    <div id="view-register" class="section-view">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card p-4 p-md-5 shadow border-0">
+                        <div class="text-center mb-4">
+                            <div class="stat-icon green mx-auto mb-2"><i class="bi bi-person-plus-fill fs-3"></i></div>
+                            <h3 class="fw-bold">Register as Driver</h3>
+                            <p class="text-muted small">Create an account to reserve bays and manage passes</p>
+                        </div>
+                        <form onsubmit="handleRegister(event)">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Full Name *</label>
+                                <input type="text" id="regName" class="form-control" required placeholder="John Driver">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Email Address *</label>
+                                <input type="email" id="regEmail" class="form-control" required placeholder="driver@smartpark.com">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Phone Number</label>
+                                <input type="text" id="regPhone" class="form-control" placeholder="+1-555-0102">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Password *</label>
+                                    <input type="password" id="regPassword" class="form-control" required minlength="6">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-semibold">Confirm Password *</label>
+                                    <input type="password" id="regConfirmPassword" class="form-control" required minlength="6">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-accent w-100 py-2 fw-semibold">Complete Registration</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: Driver Slot Search -->
+    <div id="view-driver-search" class="section-view">
+        <div class="container py-4">
+            <div class="card p-4 border-0 shadow-sm mb-4">
+                <h4 class="fw-bold mb-3"><i class="bi bi-funnel-fill text-primary me-2"></i>Search Vacant Bays</h4>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Zone / Terminal</label>
+                        <select id="searchZoneSelect" class="form-select"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Vehicle Type</label>
+                        <select id="searchTypeSelect" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="CAR">Car</option>
+                            <option value="BIKE">Motorcycle / Bike</option>
+                            <option value="EV">Electric Vehicle (EV)</option>
+                            <option value="TRUCK">Truck</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Duration (Hours)</label>
+                        <input type="number" id="searchDuration" class="form-control" value="2" min="1" max="72">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="searchAvailableSlots()">Search</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3" id="searchResultsGrid">
+                <!-- Search Results populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: Driver Bookings -->
+    <div id="view-driver-bookings" class="section-view">
+        <div class="container py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0">My Reservations</h3>
+                <button class="btn btn-accent btn-sm" onclick="showView('driver-search')">New Booking</button>
+            </div>
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Code</th>
+                                <th>Vehicle</th>
+                                <th>Slot &amp; Zone</th>
+                                <th>Scheduled Time</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="driverBookingsTbody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: Driver Vehicles (Garage) -->
+    <div id="view-driver-vehicles" class="section-view">
+        <div class="container py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0">My Garage</h3>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+                    <i class="bi bi-plus-lg me-1"></i> Register Vehicle
+                </button>
+            </div>
+            <div class="row g-3" id="driverVehiclesGrid">
+                <!-- Injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: Operator Live Grid -->
+    <div id="view-operator-grid" class="section-view">
+        <div class="container-fluid px-lg-4 py-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">Live Occupancy Grid</h3>
+                    <p class="text-muted small mb-0">Real-time visual yard monitor</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <select id="opZoneSelect" class="form-select form-select-sm" onchange="refreshOpSlots(this.value)"></select>
+                </div>
+            </div>
+            <div class="card p-4 border-0 shadow-sm">
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3" id="operatorGridContainer">
+                    <!-- Dynamic Grid of Slots -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: Operator Gate Processing -->
+    <div id="view-operator-bookings" class="section-view">
+        <div class="container-fluid px-lg-4 py-4">
+            <h3 class="fw-bold mb-4">Gate Check-In &amp; Check-Out</h3>
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Booking Code</th>
+                                <th>Driver / Plate</th>
+                                <th>Slot</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="opBookingsTbody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: Admin Analytics Dashboard -->
+    <div id="view-admin-dashboard" class="section-view">
+        <div class="container-fluid px-lg-4 py-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold mb-0">Executive Analytics Dashboard</h3>
+                <button class="btn btn-success btn-sm" onclick="downloadCsvReport()">
+                    <i class="bi bi-download me-1"></i> Export CSV Report
+                </button>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="bi bi-currency-dollar"></i></div>
+                        <div>
+                            <div class="fs-4 fw-bold text-success" id="adminTotalRev">$0.00</div>
+                            <div class="text-muted small">Total Revenue</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="bi bi-calendar2-day"></i></div>
+                        <div>
+                            <div class="fs-4 fw-bold text-primary" id="adminTodayRev">$0.00</div>
+                            <div class="text-muted small">Today's Revenue</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon amber"><i class="bi bi-ticket-perforated"></i></div>
+                        <div>
+                            <div class="fs-4 fw-bold text-warning" id="adminTodayBookings">0</div>
+                            <div class="text-muted small">Today's Bookings</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="bi bi-people"></i></div>
+                        <div>
+                            <div class="fs-4 fw-bold text-dark" id="adminTotalUsers">0</div>
+                            <div class="text-muted small">Registered Accounts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-7">
+                    <div class="card p-3 border-0 shadow-sm h-100">
+                        <h5 class="fw-bold mb-3">Revenue Trend (Last 7 Days)</h5>
+                        <canvas id="chartRevenue" style="max-height: 260px;"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="card p-3 border-0 shadow-sm h-100">
+                        <h5 class="fw-bold mb-3">Occupancy by Zone</h5>
+                        <div style="max-width: 260px; margin: auto;">
+                            <canvas id="chartOccupancy"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: Admin Users -->
+    <div id="view-admin-users" class="section-view">
+        <div class="container-fluid px-lg-4 py-4">
+            <h3 class="fw-bold mb-4">User &amp; Operator Accounts</h3>
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTbody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- Footer -->
+<footer>
+    <div class="container text-center">
+        <div class="fw-bold text-white mb-1"><i class="bi bi-p-square-fill text-warning me-1"></i> SmartPark</div>
+        <p class="small text-secondary mb-2">Park Smarter | Save Time | Move Better</p>
+        <div class="small text-secondary">&copy; 2026 SmartPark. Ready for Render &amp; Vercel.</div>
+    </div>
+</footer>
+
+<!-- Modals -->
+<!-- API Base Config Modal -->
+<div class="modal fade" id="apiConfigModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-hdd-network me-2"></i>Backend API Target</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label small fw-semibold">Backend URL (Render or Localhost)</label>
+                <div class="input-group mb-2">
+                    <input type="text" id="apiBaseInput" class="form-control font-monospace" placeholder="https://smartpark-backend.onrender.com" value="">
+                    <button class="btn btn-outline-primary" type="button" onclick="testBackendConnection()">
+                        <i class="bi bi-lightning-charge-fill me-1"></i>Test
+                    </button>
+                </div>
+                <div id="apiTestResult" class="small mb-3 d-none"></div>
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="setApiTarget('http://localhost:8080/api')">Local (localhost:8080)</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="setApiTarget('/api')">Vercel Proxy (/api)</button>
+                    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="resetToDefaultApi()">Reset Default</button>
+                </div>
+                <div class="alert alert-light border small text-muted mb-0">
+                    <i class="bi bi-info-circle me-1 text-primary"></i>
+                    <strong>Auto-Format:</strong> Paste your Render service URL (e.g. <code>https://my-backend.onrender.com</code>). <code>https://</code> and <code>/api</code> will be automatically normalized.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveApiConfig()">Save Target</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reserve Modal -->
+<div class="modal fade" id="reserveSlotModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Reserve Parking Slot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalSlotId">
+                <div class="p-3 bg-light rounded border mb-3">
+                    <div class="text-muted small">Target Bay:</div>
+                    <div class="h5 fw-bold text-primary mb-0" id="modalSlotDetails">A-01 in Zone A</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Select Matching Vehicle</label>
+                    <select id="modalVehicleSelect" class="form-select" required></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Expected Duration (Hours)</label>
+                    <input type="number" id="modalDuration" class="form-control" value="2" min="1" max="72">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-accent" onclick="submitReservation()">Confirm Reservation</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Digital QR Pass Modal -->
+<div class="modal fade" id="passModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <span class="badge bg-success mb-2" id="passStatus">CONFIRMED</span>
+                <h4 class="fw-bold font-monospace text-primary mb-3" id="passCode">SP-12345678</h4>
+                <div class="p-3 bg-white border rounded shadow-sm d-inline-block mb-3">
+                    <img id="passQrImage" src="" alt="QR Pass" style="width: 180px; height: 180px;">
+                </div>
+                <div class="small text-muted mb-1">Bay: <strong id="passSlot">A-01</strong></div>
+                <div class="small text-muted mb-1">Vehicle: <strong id="passVehicle">KA-01-AB-1234</strong></div>
+                <div class="h5 fw-bold text-success mt-2" id="passAmount">$25.00</div>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-primary btn-sm px-4" data-bs-dismiss="modal">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Vehicle Modal -->
+<div class="modal fade" id="addVehicleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form onsubmit="submitAddVehicle(event)">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Register Vehicle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">License Plate *</label>
+                        <input type="text" id="vehPlate" class="form-control text-uppercase" placeholder="KA-01-AB-1234" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Vehicle Type *</label>
+                        <select id="vehType" class="form-select" required>
+                            <option value="CAR">Car</option>
+                            <option value="BIKE">Motorcycle / Bike</option>
+                            <option value="EV">Electric Vehicle (EV)</option>
+                            <option value="TRUCK">Truck</option>
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Brand / Make</label>
+                            <input type="text" id="vehBrand" class="form-control" placeholder="Honda">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Model</label>
+                            <input type="text" id="vehModel" class="form-control" placeholder="Civic">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save to Garage</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Alert -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="appToast" class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastBody">Notification message</div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap 5 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Application JS -->
+<script src="js/app.js"></script>
+</body>
+</html>
